@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="462.25 164 675.5 524.93">
+  <defs>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6EE7FF"/>
+      <stop offset="55%" stop-color="#6B8CFF"/>
+      <stop offset="100%" stop-color="#A78BFA"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="none"/>
+  <g transform="translate(0,24)" fill="url(#g2)">
+    <path d="M800 140 L620 500 L740 500 L776 424 L800 230 Z"/>
+    <path d="M800 140 L980 500 L860 500 L824 424 L800 230 Z"/>
+    <path d="M752 500 L848 500 L800 424 Z"/>
+  </g>
+  <g font-family="Inter, Segoe UI, Roboto, Arial, sans-serif" text-anchor="middle">
+    <text x="800" y="620" font-size="120" font-weight="800" fill="#E6EDF7" letter-spacing="6">ANVILIUM</text>
+    <text x="800" y="680" font-size="36" fill="#C9D6FF" opacity=".9">Crafted for Operations. Tuned for Profit.</text>
+  </g>
+</svg>

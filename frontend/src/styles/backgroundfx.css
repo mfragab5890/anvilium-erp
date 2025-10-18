@@ -1,0 +1,81 @@
+/* ---- BackgroundFX global styles ---- */
+.ar_fx{
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* AURORA: animated gradient wash */
+.ar_fx-aurora{
+  background: linear-gradient(-45deg,#0b1220,#101b3a,#0a3d62,#0f2a3f);
+  background-size: 400% 400%;
+  animation: arAurora 18s ease infinite;
+}
+@keyframes arAurora{
+  0%{ background-position: 0% 50%; }
+  50%{ background-position: 100% 50%; }
+  100%{ background-position: 0% 50%; }
+}
+
+/* NEON GRID: gradient base + drifting grid overlay */
+.ar_fx-neon{
+  background: radial-gradient(1200px 600px at 20% 0%, rgba(0,162,255,.2), transparent 60%),
+              radial-gradient(1000px 600px at 80% 100%, rgba(46,230,166,.1), transparent 60%),
+              linear-gradient(180deg, #0b1220 0%, #0b1220 60%, #0a0f1a 100%);
+}
+.ar_fx-neon::after{
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px) 0 0/ 24px 24px,
+    linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px) 0 0/ 24px 24px;
+  animation: arGridMove 40s linear infinite;
+  opacity: .18;
+}
+@keyframes arGridMove{ to{ background-position: 1200px 0, 0 1200px; }}
+
+/* STARSCAPE: subtle starfield */
+.ar_fx-stars{
+  background-color: #0b1220;
+  overflow: hidden;
+}
+.ar_fx-stars::before,
+.ar_fx-stars::after{
+  content:"";
+  position:absolute; inset:-20%;
+  background-repeat: repeat;
+  background-size: 3px 3px;
+  opacity:.4;
+  animation: arStarDrift 120s linear infinite;
+  background-image: radial-gradient(#7aa0ff 1px, transparent 1px);
+}
+.ar_fx-stars::after{
+  opacity:.25; transform: scale(1.5);
+  background-image: radial-gradient(#2ee6a6 1px, transparent 1px);
+  animation-duration: 180s;
+}
+@keyframes arStarDrift{
+  from{ transform: translate3d(0,0,0) }
+  to{ transform: translate3d(-600px,-300px,0) }
+}
+
+/* Reusable glass card helper (optional) */
+.ar_glass{
+  background: rgba(17,24,39,.35);
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-radius: 14px;
+}
+/* KPI ring animation pulse */
+.ar_ring .ar_ring-progress{
+  transition: stroke-dashoffset 600ms cubic-bezier(.22,1,.36,1);
+}
+@media (prefers-reduced-motion: reduce){
+  .ar_fx, .ar_fx::before, .ar_fx::after, .ar_ring .ar_ring-progress{
+    animation: none !important;
+    transition: none !important;
+  }
+}

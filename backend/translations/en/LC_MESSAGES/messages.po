@@ -1,0 +1,12 @@
+msgid ""
+msgstr ""
+"Language: en\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+#: modules/auth/routes.py
+msgid "Invalid credentials"
+msgstr "Invalid credentials"
+
+#: modules/auth/routes.py
+msgid "Logged out"
+msgstr "Logged out"

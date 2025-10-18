@@ -1,0 +1,13 @@
+# Python
+__pycache__
+.pyc
+.env
+.env.dev
+.env.prod
+.venv
+instance
+.db
+# Node.js
+node_modules
+dist
+.env.local

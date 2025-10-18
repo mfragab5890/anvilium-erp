@@ -1,0 +1,3 @@
+# Global API defaults
+DEFAULT_PAGE_SIZE = 50
+MAX_PAGE_SIZE = 100
