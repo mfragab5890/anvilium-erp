@@ -4,7 +4,7 @@
 
 ANVILIUM is an end-to-end Enterprise Resource Planning (ERP) system tailored for industrial service providers in mechanical, electrical, and civil sectors. Designed for comprehensive traceability (who/what/when/where/cost) and actionable insights, it reduces waste, improves margins, and accelerates growth. The platform supports phased deployment, English/Arabic localization, multi-branch operations, and standard workflows from proposals to project closeout, inventory management, HR/payroll, financials, and compliance.
 
-Key design principles include business-first phrasing, role-based access, one source of truth for modules/tabs, and UAE-ready features like national holidays and document expiries. For full business specifications, refer to the [Industrial Services Provider ERP Specs](Industrial_Services_Provider_ERP_Specs.docx).
+Key design principles include business-first phrasing, role-based access, one source of truth for modules/tabs, and UAE-ready features like national holidays and document expiries. For full business specifications, refer to the [Industrial Services Provider ERP Specs](Industrial_Services_Provider_ERP_Specs.pdf).
 
 ## Tech Stack
 
