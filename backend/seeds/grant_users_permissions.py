@@ -1,6 +1,7 @@
 from app import app
 from extensions import db
 from modules.users.models import Role, Permission
+import json
 
 USERS_PERMS = [
     dict(code="api:users:read",   name_en="Users: Read",   name_ar="المستخدمون: قراءة", type="api", method="GET",  path="/api/users"),
@@ -37,8 +38,13 @@ def grant_to_admin_and_super():
         db.session.commit()
     return changed
 
+def main():
+    """Main function for seeding permissions."""
+    c1 = ensure_permissions()
+    c2 = grant_to_admin_and_super()
+    return {"created_permissions": c1, "grants_added": c2}
+
 if __name__ == "__main__":
     with app.app_context():
-        c1 = ensure_permissions()
-        c2 = grant_to_admin_and_super()
-        print({"created_permissions": c1, "grants_added": c2})
+        result = main()
+        print(json.dumps(result, indent=2, ensure_ascii=False))
