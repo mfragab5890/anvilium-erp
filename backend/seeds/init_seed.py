@@ -222,34 +222,83 @@ def seed_user_branches_all():
 # -------------------------
 def run_all() -> dict:
     """
-    Runs all seed steps under a single commit.
-    Writes to seed_registry only if *all* steps succeed.
-    Idempotent: safe to call multiple times (will only add missing rows).
+    Run all seeding operations with comprehensive logging.
     """
+    import os
+
+    print("🔍 SEED DEBUG INFO:")
+    print(f"   APP_ENV: {os.getenv('APP_ENV', 'NOT_SET')}")
+    print(f"   DATABASE_URL: {os.getenv('DATABASE_URL', 'NOT_SET')[:50]}...")
+    print(f"   Seed key: {SEED_KEY}")
+
+    # Check if already completed
     if _seed_already_completed():
-        return {"skipped": True, "reason": "seed already completed", "key": SEED_KEY}
+        print(f"⚠️  Seed {SEED_KEY} already completed - skipping")
+        return {"skipped": True, "key": SEED_KEY}
 
-    # Ensure we start clean (resolves "transaction already begun" issues)
-    db.session.rollback()
+    print("🚀 Starting database seeding...")
 
-    summary = {}
     try:
-        summary["app_modules"]    = seed_app_modules()
+        print("\n📊 COUNTS BEFORE SEEDING:")
+        print(f"   Users: {User.query.count()}")
+        print(f"   Roles: {Role.query.count()}")
+        print(f"   Permissions: {Permission.query.count()}")
+        print(f"   Branches: {Branch.query.count()}")
+        print(f"   AppModules: {AppModule.query.count()}")
+
+        summary = {}
+
+        print("\n🔄 SEEDING OPERATIONS:")
+
+        print("   Seeding app modules...")
+        summary["modules"]        = seed_app_modules()
+        print(f"   ✅ Modules seeded: {summary['modules']}")
+
+        print("   Seeding branches...")
         summary["branches"]       = seed_branches()
-        summary["document_types"] = seed_document_types()
+        print(f"   ✅ Branches seeded: {summary['branches']}")
+
+        print("   Seeding document types...")
+        summary["doc_types"]      = seed_document_types()
+        print(f"   ✅ Document types seeded: {summary['doc_types']}")
+
+        print("   Seeding holidays...")
         summary["holidays"]       = seed_holidays()
+        print(f"   ✅ Holidays seeded: {summary['holidays']}")
 
+        print("   Seeding permissions...")
         summary["permissions"]    = seed_permissions()
-        summary["roles"]          = seed_roles()
-        summary["users"]          = seed_users()
-        summary["user_branches"]  = seed_user_branches_all()
+        print(f"   ✅ Permissions seeded: {summary['permissions']}")
 
-        # Only mark as completed after all succeeded
+        print("   Seeding roles...")
+        summary["roles"]          = seed_roles()
+        print(f"   ✅ Roles seeded: {summary['roles']}")
+
+        print("   Seeding users...")
+        summary["users"]          = seed_users()
+        print(f"   ✅ Users seeded: {summary['users']}")
+
+        print("   Seeding user branches...")
+        summary["user_branches"]  = seed_user_branches_all()
+        print(f"   ✅ User branches seeded: {summary['user_branches']}")
+
+        print("   Recording seed completion...")
         _insert_seed_registry({"summary": summary})
 
+        print("\n💾 COMMITTING TO DATABASE...")
         db.session.commit()
+        print("✅ Database transaction committed successfully!")
+
+        print("\n📊 COUNTS AFTER SEEDING:")
+        print(f"   Users: {User.query.count()}")
+        print(f"   Roles: {Role.query.count()}")
+        print(f"   Permissions: {Permission.query.count()}")
+        print(f"   Branches: {Branch.query.count()}")
+        print(f"   AppModules: {AppModule.query.count()}")
+
         return {"skipped": False, "key": SEED_KEY, "summary": summary}
-    except Exception:
+    except Exception as e:
+        print(f"❌ ERROR during seeding: {e}")
         db.session.rollback()
         raise
 
