@@ -49,7 +49,17 @@ app.config["DEFAULT_LOCALE"] = os.getenv("DEFAULT_LOCALE", "en")
 origins = app.config.get("CORS_ORIGINS", "*")
 if isinstance(origins, str) and origins != "*":
     origins = [o.strip() for o in origins.split(",") if o.strip()]
-CORS(app, resources={r"/*": {"origins": origins}}, supports_credentials=False)
+
+# For production, allow frontend domain
+if APP_ENV == "prod":
+    frontend_url = os.getenv("FRONTEND_URL")
+    if frontend_url:
+        if origins == "*":
+            origins = [frontend_url]
+        elif isinstance(origins, list):
+            origins.append(frontend_url)
+
+CORS(app, resources={r"/*": {"origins": origins}}, supports_credentials=True)
 
 # Initialize extensions
 db.init_app(app)
