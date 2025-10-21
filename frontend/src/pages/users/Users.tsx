@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import {
   Box, Typography, TextField, Stack, IconButton, Chip, Alert
 } from '@mui/material'
@@ -29,6 +29,7 @@ export default function Users() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [q, setQ] = useState('')
+  const [qDebounced, setQDebounced] = useState('')
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 50 }) // default 50
 
   const cols: GridColDef<User>[] = [
@@ -51,12 +52,17 @@ export default function Users() {
     },
   ]
 
-  const fetchPage = async (model = paginationModel) => {
+  // debounce search
+  useEffect(() => {
+    const t = setTimeout(() => setQDebounced(q), 350)
+    return () => clearTimeout(t)
+  }, [q])
+
+  const fetchPage = useCallback(async () => {
     setLoading(true); setError(null)
     try {
-      const { page, pageSize } = model
       const { data } = await api.get<PageResp<User>>('/users/', {
-        params: { page: page + 1, size: pageSize, q }
+        params: { page: paginationModel.page + 1, size: paginationModel.pageSize, q: qDebounced }
       })
       setRows(data.items || [])
       setRowCount(data.total || 0)
@@ -68,12 +74,16 @@ export default function Users() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [paginationModel.page, paginationModel.pageSize, qDebounced])
 
   useEffect(() => { fetchPage() }, []) // initial
-  useEffect(() => { fetchPage() }, [paginationModel.page, paginationModel.pageSize]) // page/size changes
+  useEffect(() => { fetchPage() }, [fetchPage]) // when pagination or search changes
 
-  const runSearch = () => { setPaginationModel(m => ({ ...m, page: 0 })); fetchPage({ ...paginationModel, page: 0 }) }
+  const runSearch = () => {
+    // Update debounced search immediately and reset to page 0
+    setQDebounced(q)
+    setPaginationModel(prev => ({ ...prev, page: 0 }))
+  }
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') runSearch() }
 
   return (
