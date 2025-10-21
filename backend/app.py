@@ -19,36 +19,38 @@ def _select_locale():
     accept = request.headers.get("Accept-Language", "")
     return accept.split(",")[0] if accept else "en"
 
-def create_app() -> Flask:
-    _load_env()
-    app = Flask(__name__)
-    app.config.from_object(config(None))
-    app.url_map.strict_slashes = False
-    
-    origins = app.config.get("CORS_ORIGINS", "*")
-    if isinstance(origins, str) and origins != "*":
-        origins = [o.strip() for o in origins.split(",") if o.strip()]
-    CORS(app, resources={r"/*": {"origins": origins}}, supports_credentials=False)
+# Load environment variables
+_load_env()
 
-    db.init_app(app)
-    migrate.init_app(app, db)
-    jwt.init_app(app)
-    babel.init_app(app, locale_selector=_select_locale)
+# Create Flask app instance
+app = Flask(__name__)
+app.config.from_object(config(None))
+app.url_map.strict_slashes = False
 
-    # import models so Alembic sees them
-    import modules.core.models
-    import modules.users.models
-    import modules.hr.models
-    import modules.admin.models
-    
-    register_all_blueprints(app)
+# Configure CORS
+origins = app.config.get("CORS_ORIGINS", "*")
+if isinstance(origins, str) and origins != "*":
+    origins = [o.strip() for o in origins.split(",") if o.strip()]
+CORS(app, resources={r"/*": {"origins": origins}}, supports_credentials=False)
 
-    @app.shell_context_processor
-    def _make_shell_ctx():
-        return {"db": db}
+# Initialize extensions
+db.init_app(app)
+migrate.init_app(app, db)
+jwt.init_app(app)
+babel.init_app(app, locale_selector=_select_locale)
 
-    return app
+# Import models so Alembic sees them
+import modules.core.models
+import modules.users.models
+import modules.hr.models
+import modules.admin.models
+
+# Register blueprints
+register_all_blueprints(app)
+
+@app.shell_context_processor
+def _make_shell_ctx():
+    return {"db": db}
 
 if __name__ == "__main__":
-    app = create_app()
     app.run(debug=True, host=app.config.get("HOST", "127.0.0.1"), port=int(app.config.get("PORT", 5000)))
