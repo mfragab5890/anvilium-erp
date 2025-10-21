@@ -1,11 +1,9 @@
 # app.py
-from __future__ import annotations
 import os, pathlib
 from flask import Flask, request
 from flask_cors import CORS
 from dotenv import load_dotenv
 from extensions import db, migrate, jwt, babel
-from settings import config
 from modules import register_all_blueprints
 
 def _load_env():
@@ -23,9 +21,29 @@ def _select_locale():
 _load_env()
 
 # Create Flask app instance
-app = Flask(__name__)
-app.config.from_object(config(None))
-app.url_map.strict_slashes = False
+app = Flask(__name__, instance_relative_config=False)
+app.secret_key = os.getenv("JWT_SECRET_KEY", "dev-secret-change-me")
+
+# Detect environment
+APP_ENV = os.getenv("APP_ENV", "dev")
+
+# Database configuration
+if APP_ENV == "prod":
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+else:
+    # Use DATABASE_URL if provided, otherwise use PostgreSQL for local development
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL") or "postgresql+psycopg2://postgres:tafiTAFI@localhost:5432/anvilium_dev"
+
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "dev-secret-change-me")
+app.config["JWT_TOKEN_LOCATION"] = ["headers"]
+app.config["JWT_HEADER_NAME"] = "Authorization"
+app.config["JWT_HEADER_TYPE"] = "Bearer"
+app.config["JWT_COOKIE_CSRF_PROTECT"] = False
+app.config["CORS_ORIGINS"] = os.getenv("CORS_ORIGINS", "*")
+app.config["ADMIN_EMAIL"] = os.getenv("ADMIN_EMAIL", "ADMIN@ANVILIUM")
+app.config["ADMIN_PASSWORD"] = os.getenv("ADMIN_PASSWORD", "ADMIN@ANVILIUM")
+app.config["DEFAULT_LOCALE"] = os.getenv("DEFAULT_LOCALE", "en")
 
 # Configure CORS
 origins = app.config.get("CORS_ORIGINS", "*")
