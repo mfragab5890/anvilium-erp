@@ -6,7 +6,7 @@ Flask-Cors==4.0.0
 Gunicorn==21.2.0
 marshmallow==3.21.1
 marshmallow-sqlalchemy==1.0.0
-psycopg[binary]==3.2.11
+psycopg2-binary==2.9.9
 Flask-Babel==4.0.0
 python-dotenv==1.0.1
 PyMySQL==1.1.1
