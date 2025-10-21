@@ -40,9 +40,19 @@ def grant_to_admin_and_super():
 
 def main():
     """Main function for seeding permissions."""
-    c1 = ensure_permissions()
-    c2 = grant_to_admin_and_super()
-    return {"created_permissions": c1, "grants_added": c2}
+    print("🔍 Checking database state for permissions...")
+
+    try:
+        c1 = ensure_permissions()
+        print(f"   Created {c1} new permissions")
+
+        c2 = grant_to_admin_and_super()
+        print(f"   Added {c2} permission grants to roles")
+
+        return {"created_permissions": c1, "grants_added": c2}
+    except Exception as e:
+        print(f"   ❌ Error in permissions seeding: {e}")
+        return {"error": str(e), "created_permissions": 0, "grants_added": 0}
 
 if __name__ == "__main__":
     with app.app_context():

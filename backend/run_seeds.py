@@ -32,9 +32,15 @@ def run_seed_file(seed_file_path):
         elif hasattr(module, 'main'):
             print(f"🔄 Calling main() from {seed_file_path.name}...")
             try:
-                # Try calling main() without arguments first
-                result = module.main()
-                print(f"✅ {seed_file_path.name} completed: {result}")
+                # Ensure app context is available for this module
+                if hasattr(module, 'app'):
+                    with module.app.app_context():
+                        result = module.main()
+                        print(f"✅ {seed_file_path.name} completed: {result}")
+                else:
+                    # Fallback: try to call without context (might already be in context)
+                    result = module.main()
+                    print(f"✅ {seed_file_path.name} completed: {result}")
             except TypeError as e:
                 if "missing" in str(e) and "argument" in str(e):
                     # Handle seed files that need arguments
@@ -43,7 +49,11 @@ def run_seed_file(seed_file_path):
                         xlsx_path = seed_file_path.parent / "sample_Labor List_2025.XLSX"
                         if xlsx_path.exists():
                             print(f"🔄 Calling main() with Excel file: {xlsx_path}")
-                            result = module.main(str(xlsx_path))
+                            if hasattr(module, 'app'):
+                                with module.app.app_context():
+                                    result = module.main(str(xlsx_path))
+                            else:
+                                result = module.main(str(xlsx_path))
                             print(f"✅ {seed_file_path.name} completed: {result}")
                         else:
                             print(f"⚠️  Excel file not found: {xlsx_path}")
@@ -94,9 +104,13 @@ def main():
     failed_seeds = []
     for seed_file in sorted(seed_files):
         print(f"\n📄 Running {seed_file.name}...")
-        if run_seed_file(seed_file):
-            success_count += 1
-        else:
+        try:
+            if run_seed_file(seed_file):
+                success_count += 1
+            else:
+                failed_seeds.append(seed_file.name)
+        except Exception as e:
+            print(f"❌ Exception running {seed_file.name}: {e}")
             failed_seeds.append(seed_file.name)
 
     print("🎉 Seed execution completed!" )
@@ -106,12 +120,9 @@ def main():
         print(f"⚠️  Failed seeds: {', '.join(failed_seeds)}")
         print("   Continuing deployment... (some seeds may have failed but app will still start)")
 
-    if success_count == len(seed_files):
-        print("🎊 All seeds completed successfully!")
-        sys.exit(0)
-    else:
-        print(f"⚠️  {len(seed_files) - success_count} seed files failed, but continuing deployment...")
-        sys.exit(0)  # Continue deployment even if some seeds fail
+    # Always exit with success so deployment continues
+    print("🚀 Deployment continuing...")
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()

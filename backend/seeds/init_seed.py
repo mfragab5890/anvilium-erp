@@ -216,6 +216,12 @@ def seed_users():
             print(f"   ⚠️  Role {user_data['role_code']} not found, skipping user {user_data['email']}")
             continue
 
+        # Check if user already exists
+        existing_user = User.query.filter_by(email=user_data["email"]).first()
+        if existing_user:
+            print(f"   ⚠️  User {user_data['email']} already exists, skipping")
+            continue
+
         user_row = dict(user_data)
         user_row["role_id"] = rid
         user_row.pop("role_code", None)
@@ -225,7 +231,21 @@ def seed_users():
         print("   ⚠️  No valid users to insert")
         return 0
 
-    return _bulk_ignore_insert(User, out, conflict_cols=["email"])
+    # Use simple insert instead of bulk insert for users to avoid constraint issues
+    inserted = 0
+    for user_row in out:
+        try:
+            db.session.add(User(**user_row))
+            inserted += 1
+        except Exception as e:
+            print(f"   ❌ Failed to insert user {user_row['email']}: {e}")
+            db.session.rollback()
+
+    if inserted > 0:
+        db.session.commit()
+        print(f"   ✅ Successfully inserted {inserted} users")
+
+    return inserted
 
 def seed_user_branches_all():
     all_branch = Branch.query.filter_by(code="ALL").first()
@@ -354,8 +374,13 @@ def run_all() -> dict:
         _insert_seed_registry({"summary": summary})
 
         print("\n💾 COMMITTING TO DATABASE...")
-        db.session.commit()
-        print("✅ Database transaction committed successfully!")
+        try:
+            db.session.commit()
+            print("✅ Database transaction committed successfully!")
+        except Exception as e:
+            print(f"⚠️  Commit failed: {e}")
+            print("   This might be due to failed operations - checking what's already in DB...")
+            db.session.rollback()
 
         print("\n📊 COUNTS AFTER SEEDING:")
         print(f"   Users: {User.query.count()}")
@@ -369,6 +394,13 @@ def run_all() -> dict:
         if "InvalidColumnReference" in str(e) or "ON CONFLICT" in str(e):
             print(f"⚠️  Database constraint error (continuing deployment): {e}")
             print("💡 This might be due to database schema mismatch - deployment will continue")
+            # Still try to commit what we have
+            try:
+                db.session.commit()
+                print("✅ Partial commit successful!")
+            except Exception:
+                db.session.rollback()
+                print("❌ Rollback completed")
             return {"skipped": False, "key": SEED_KEY, "summary": summary, "error": str(e)}
         else:
             print(f"❌ CRITICAL ERROR during seeding: {e}")
