@@ -231,6 +231,17 @@ def run_all() -> dict:
     print(f"   DATABASE_URL: {os.getenv('DATABASE_URL', 'NOT_SET')[:50]}...")
     print(f"   Seed key: {SEED_KEY}")
 
+    # Test database connection first
+    try:
+        print("🔗 Testing database connection...")
+        # Simple connection test - try to execute a basic query
+        db.session.execute(db.text("SELECT 1"))
+        print("✅ Database connection successful!")
+    except Exception as e:
+        print(f"❌ Database connection failed: {e}")
+        print(f"   Error type: {type(e).__name__}")
+        raise
+
     # Check if already completed
     if _seed_already_completed():
         print(f"⚠️  Seed {SEED_KEY} already completed - skipping")
@@ -303,6 +314,7 @@ def run_all() -> dict:
         raise
 
 if __name__ == "__main__":
+    print("🚀 Starting database seeding... in init_seed.py")
     with app.app_context():
         result = run_all()
         print(json.dumps(result, indent=2, ensure_ascii=False))
