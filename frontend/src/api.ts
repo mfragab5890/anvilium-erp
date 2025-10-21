@@ -30,11 +30,13 @@ api.interceptors.request.use(
     // auth
     const token = getToken()
     if (token) {
-      cfg.headers = { ...(cfg.headers || {}), Authorization: `Bearer ${token}` }
+      cfg.headers = cfg.headers || {}
+      cfg.headers.Authorization = `Bearer ${token}`
     }
     // i18n
     const lang = i18n?.language || 'en'
-    cfg.headers = { ...(cfg.headers || {}), 'Accept-Language': lang }
+    cfg.headers = cfg.headers || {}
+    cfg.headers['Accept-Language'] = lang
     return cfg
   },
   (err) => {
