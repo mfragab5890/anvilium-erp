@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import {
   Box, Typography, TextField, Stack, IconButton, Chip, Alert
 } from '@mui/material'
@@ -31,6 +31,7 @@ export default function Users() {
   const [q, setQ] = useState('')
   const [qDebounced, setQDebounced] = useState('')
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 50 }) // default 50
+  const loadingRef = useRef(false)
 
   const cols: GridColDef<User>[] = [
     { field: 'id', headerName: 'ID', width: 80 },
@@ -59,11 +60,27 @@ export default function Users() {
   }, [q])
 
   const fetchPage = useCallback(async () => {
-    setLoading(true); setError(null)
+    // Prevent concurrent API calls
+    if (loadingRef.current) {
+      console.log('⏳ fetchPage skipped - already loading')
+      return
+    }
+
+    console.log('🚀 fetchPage called with:', {
+      page: paginationModel.page + 1,
+      size: paginationModel.pageSize,
+      search: qDebounced
+    })
+
+    loadingRef.current = true
+    setLoading(true)
+    setError(null)
+
     try {
       const { data } = await api.get<PageResp<User>>('/users/', {
         params: { page: paginationModel.page + 1, size: paginationModel.pageSize, q: qDebounced }
       })
+      console.log('✅ fetchPage completed:', data.items?.length, 'items')
       setRows(data.items || [])
       setRowCount(data.total || 0)
     } catch (err: any) {
@@ -72,12 +89,20 @@ export default function Users() {
       else setError(err?.response?.data?.message || err?.message || 'Failed to load users')
       setRows([]); setRowCount(0)
     } finally {
+      loadingRef.current = false
       setLoading(false)
     }
-  }, [paginationModel.page, paginationModel.pageSize, qDebounced])
+  }, [paginationModel.page, paginationModel.pageSize, qDebounced]) // Removed loading from dependencies
 
-  useEffect(() => { fetchPage() }, []) // initial
-  useEffect(() => { fetchPage() }, [fetchPage]) // when pagination or search changes
+  useEffect(() => {
+    console.log('🔄 useEffect triggered:', {
+      page: paginationModel.page,
+      pageSize: paginationModel.pageSize,
+      search: qDebounced,
+      timestamp: Date.now()
+    })
+    fetchPage()
+  }, [paginationModel.page, paginationModel.pageSize, qDebounced]) // Call on mount and when dependencies change
 
   const runSearch = () => {
     // Update debounced search immediately and reset to page 0
