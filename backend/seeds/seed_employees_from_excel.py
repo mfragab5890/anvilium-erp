@@ -11,7 +11,7 @@ import argparse, os, math
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
-from app import create_app
+from app import app
 from extensions import db
 import sqlalchemy as sa
 
@@ -211,6 +211,5 @@ if __name__ == "__main__":
     if not args.path or not os.path.exists(args.path):
         raise SystemExit(f"Excel file not found:\n  {args.path}\nUpdate DEFAULT_XLSX_PATH or pass --path.")
 
-    app = create_app()
     with app.app_context():
         main(args.path)

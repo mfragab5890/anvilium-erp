@@ -1,6 +1,6 @@
 from __future__ import annotations
 from datetime import datetime
-from app import create_app
+from app import app
 from extensions import db
 from modules.core.models import AppModule, AppModuleTab, SeedRegistry
 
@@ -142,7 +142,6 @@ def seed_modules_and_tabs() -> None:
     db.session.commit()
 
 def main():
-    app = create_app()
     with app.app_context():
         seed_modules_and_tabs()
         print("✅ Dropped & reseeded modules/tabs")

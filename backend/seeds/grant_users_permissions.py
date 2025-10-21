@@ -1,4 +1,4 @@
-from app import create_app
+from app import app
 from extensions import db
 from modules.users.models import Role, Permission
 
@@ -38,7 +38,6 @@ def grant_to_admin_and_super():
     return changed
 
 if __name__ == "__main__":
-    app = create_app()
     with app.app_context():
         c1 = ensure_permissions()
         c2 = grant_to_admin_and_super()

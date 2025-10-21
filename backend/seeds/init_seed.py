@@ -8,7 +8,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as psql
 from sqlalchemy.dialects import mysql as mysql_dialect
 
-from app import create_app
+from app import app
 from extensions import db
 
 # --- import models you already have ---
@@ -254,7 +254,6 @@ def run_all() -> dict:
         raise
 
 if __name__ == "__main__":
-    app = create_app()
     with app.app_context():
         result = run_all()
         print(json.dumps(result, indent=2, ensure_ascii=False))
