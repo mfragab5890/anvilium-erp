@@ -23,7 +23,19 @@ def run_seed_file(seed_file_path):
         # Execute the module
         spec.loader.exec_module(module)
 
-        print(f"✅ Successfully ran {seed_file_path.name}")
+        # Try to call main function if it exists
+        if hasattr(module, 'run_all'):
+            print(f"🔄 Calling run_all() from {seed_file_path.name}...")
+            with module.app.app_context():
+                result = module.run_all()
+                print(f"✅ {seed_file_path.name} completed: {result}")
+        elif hasattr(module, 'main'):
+            print(f"🔄 Calling main() from {seed_file_path.name}...")
+            module.main()
+            print(f"✅ {seed_file_path.name} completed")
+        else:
+            print(f"⚠️  No main function found in {seed_file_path.name}")
+
         return True
 
     except Exception as e:
