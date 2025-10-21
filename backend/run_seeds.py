@@ -31,8 +31,26 @@ def run_seed_file(seed_file_path):
                 print(f"✅ {seed_file_path.name} completed: {result}")
         elif hasattr(module, 'main'):
             print(f"🔄 Calling main() from {seed_file_path.name}...")
-            module.main()
-            print(f"✅ {seed_file_path.name} completed")
+            try:
+                # Try calling main() without arguments first
+                module.main()
+                print(f"✅ {seed_file_path.name} completed")
+            except TypeError as e:
+                if "missing" in str(e) and "argument" in str(e):
+                    # Handle seed files that need arguments
+                    if "seed_employees_from_excel" in seed_file_path.name:
+                        # Pass the sample Excel file path
+                        xlsx_path = seed_file_path.parent / "sample_Labor List_2025.XLSX"
+                        if xlsx_path.exists():
+                            print(f"🔄 Calling main() with Excel file: {xlsx_path}")
+                            module.main(str(xlsx_path))
+                            print(f"✅ {seed_file_path.name} completed")
+                        else:
+                            print(f"⚠️  Excel file not found: {xlsx_path}")
+                    else:
+                        print(f"⚠️  {seed_file_path.name} requires arguments, skipping...")
+                else:
+                    raise
         else:
             print(f"⚠️  No main function found in {seed_file_path.name}")
 

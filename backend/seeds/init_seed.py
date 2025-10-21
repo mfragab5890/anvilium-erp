@@ -56,7 +56,13 @@ def _bulk_ignore_insert(model, rows: Iterable[Mapping], conflict_cols: list[str]
         if not conflict_cols:
             conflict_cols = _infer_conflict_cols(table) or []
         if conflict_cols:
-            stmt = stmt.on_conflict_do_nothing(index_elements=[table.c[c] for c in conflict_cols])
+            # For PostgreSQL with functional indexes, use the constraint name or DO NOTHING without columns
+            try:
+                stmt = stmt.on_conflict_do_nothing(index_elements=[table.c[c] for c in conflict_cols])
+            except Exception:
+                # Fallback: if column-based conflict fails, try constraint-name based
+                print(f"   ⚠️  Column-based conflict failed, trying constraint-based...")
+                stmt = stmt.on_conflict_do_nothing()
         else:
             stmt = stmt.on_conflict_do_nothing()
         res = db.session.execute(stmt)

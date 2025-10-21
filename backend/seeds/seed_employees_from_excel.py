@@ -18,7 +18,7 @@ import sqlalchemy as sa
 from modules.core.models import Branch
 from modules.hr.models import Employee
 
-DEFAULT_XLSX_PATH = r"D:\Web Dev\mine\ANVILIUM\21- ANVILIUM DRIVE\2- ANVILIUM LABORS\1- Workmen list\Labor List_2025.XLSX"
+DEFAULT_XLSX_PATH = "sample_Labor List_2025.XLSX"
 
 # ---------- Excel reading ----------
 def _try_import_excel():
