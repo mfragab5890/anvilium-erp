@@ -21,7 +21,7 @@ def build_database_uri() -> str:
         host = os.getenv("DB_HOST", "localhost")
         port = os.getenv("DB_PORT", "5432")
         name = os.getenv("DB_NAME", "erp")
-        return f"postgresql+psycopg://{user}:{pwd}@{host}:{port}/{name}"
+        return f"postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{name}"
     elif engine in ("mysql", "mariadb"):
         user = os.getenv("DB_USER", "root")
         pwd  = os.getenv("DB_PASS", "")
