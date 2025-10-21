@@ -4,7 +4,7 @@ import { DataGrid, GridColDef, GridSortModel } from '@mui/x-data-grid'
 import api from '../api'
 
 type Props<T = any> = {
-  endpoint: string                       // e.g. '/api/hr/employees'
+  endpoint: string                       // e.g. '/hr/employees'
   columns: GridColDef[]                  // DataGrid columns
   getRowId?: (row: T) => string | number // default: row.id
   initialPageSize?: number               // default 10
@@ -28,6 +28,7 @@ export default function ServerGrid<T = any>({
   const [rows, setRows] = React.useState<T[]>([])
   const [rowCount, setRowCount] = React.useState(0)
   const [loading, setLoading] = React.useState(false)
+  const loadingRef = React.useRef(false)
 
   // ✅ MUI v6 uses a single paginationModel object (not separate page/pageSize props)
   const [paginationModel, setPaginationModel] = React.useState({ page: 0, pageSize: initialPageSize })
@@ -42,7 +43,15 @@ export default function ServerGrid<T = any>({
   }, [search])
 
   const fetchData = React.useCallback(async () => {
+    // Prevent concurrent API calls
+    if (loadingRef.current) {
+      console.log('⏳ fetchData skipped - already loading')
+      return
+    }
+
+    loadingRef.current = true
     setLoading(true)
+
     try {
       const sort = sortModel[0]
       const params = {
@@ -62,11 +71,14 @@ export default function ServerGrid<T = any>({
       setRows(items)
       setRowCount(total)
     } finally {
+      loadingRef.current = false
       setLoading(false)
     }
   }, [endpoint, paginationModel.page, paginationModel.pageSize, searchDebounced, sortModel, extraParams])
 
-  React.useEffect(() => { void fetchData() }, [fetchData])
+  React.useEffect(() => {
+    fetchData()
+  }, [paginationModel.page, paginationModel.pageSize, searchDebounced, sortModel]) // Call when dependencies change
 
   return (
     <Box>

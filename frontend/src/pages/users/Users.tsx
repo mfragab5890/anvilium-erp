@@ -66,12 +66,6 @@ export default function Users() {
       return
     }
 
-    console.log('🚀 fetchPage called with:', {
-      page: paginationModel.page + 1,
-      size: paginationModel.pageSize,
-      search: qDebounced
-    })
-
     loadingRef.current = true
     setLoading(true)
     setError(null)
@@ -80,7 +74,6 @@ export default function Users() {
       const { data } = await api.get<PageResp<User>>('/users/', {
         params: { page: paginationModel.page + 1, size: paginationModel.pageSize, q: qDebounced }
       })
-      console.log('✅ fetchPage completed:', data.items?.length, 'items')
       setRows(data.items || [])
       setRowCount(data.total || 0)
     } catch (err: any) {
@@ -95,12 +88,6 @@ export default function Users() {
   }, [paginationModel.page, paginationModel.pageSize, qDebounced]) // Removed loading from dependencies
 
   useEffect(() => {
-    console.log('🔄 useEffect triggered:', {
-      page: paginationModel.page,
-      pageSize: paginationModel.pageSize,
-      search: qDebounced,
-      timestamp: Date.now()
-    })
     fetchPage()
   }, [paginationModel.page, paginationModel.pageSize, qDebounced]) // Call on mount and when dependencies change
 
