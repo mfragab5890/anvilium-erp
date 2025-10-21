@@ -26,7 +26,7 @@ export default function EmployeesTab() {
       </Typography>
 
       <ServerGrid
-        endpoint="/api/hr/employees"
+        endpoint="/hr/employees"
         columns={columns}
         getRowId={(r: any) => r.id}
         searchPlaceholder="Search employees"

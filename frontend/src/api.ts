@@ -24,9 +24,18 @@ const api = axios.create({
   withCredentials: true,
 })
 
+// Debug logging in development
+if (import.meta.env?.DEV) {
+  console.log('🔗 API Base URL:', api.defaults.baseURL)
+}
+
 api.interceptors.request.use(
   (cfg) => {
     inc()
+    // Debug logging in development
+    if (import.meta.env?.DEV) {
+      console.log('🚀 API Request:', cfg.method?.toUpperCase(), (cfg.baseURL || '') + (cfg.url || ''))
+    }
     // auth
     const token = getToken()
     if (token) {

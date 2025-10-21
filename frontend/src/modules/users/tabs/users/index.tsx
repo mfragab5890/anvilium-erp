@@ -25,7 +25,7 @@ export default function UsersTab() {
       </Typography>
 
       <ServerGrid
-        endpoint="/api/users"
+        endpoint="/users"
         columns={columns}
         getRowId={(r: any) => r.id}
         searchPlaceholder="Search users"
